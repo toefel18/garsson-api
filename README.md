@@ -1,2 +1,2 @@
-# garsson-api
-Garsson (garçon) is the API that makes the life of servants easier. 
+# Garsson (garçon) 
+The Open API for applications that makes the life of cafe/restaurant servants easier. 
