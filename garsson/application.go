@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/toefel18/garsson-api/garsson/logging"
-	"github.com/toefel18/garsson-api/garsson/api"
 	"os"
 	"github.com/toefel18/garsson-api/garsson/db"
 	"github.com/sirupsen/logrus"
+	api2 "github.com/toefel18/garsson-api/garsson/api"
 )
 
 //docker run --name loading-service-postgres -p 5434:5432 -e POSTGRES_USER=loadingservice -e POSTGRES_PASSWORD=loadingservice -d postgres
@@ -20,7 +20,8 @@ func main() {
 		return
 	}
 	dao.WaitTillAvailable()
-	api.Publish(dao)
+	api := api2.NewServer(dao)
+	api.Start()
 }
 
 func envOrDefault(key, defaultValue string) string {
