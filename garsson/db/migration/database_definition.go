@@ -6,13 +6,20 @@ package migration
 //          The migration script will create a hash of each query and fail if it doesn't match with the
 //          previous version
 const (
-	v1CreateProductTable = `CREATE TABLE product (
-							id SERIAL PRIMARY KEY, 
+	V1CreateProductTable = `CREATE TABLE product (
+					  		id SERIAL PRIMARY KEY, 
 							name VARCHAR(256),
 							price REAL,
 							date_added VARCHAR(64))`
+
+    V2UsersTable = `CREATE TABLE user (
+                    email VARCHAR(128) PRIMARY KEY,
+                    password_hash VARCHAR(128),
+                    roles VARCHAR(256),
+                    last_sign_in VARCHAR(64))`
 )
 
 var completeDatabaseDefinition = []string {
-    v1CreateProductTable,
+    V1CreateProductTable,
+    V2UsersTable,
 }

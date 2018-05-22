@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/labstack/echo"
-	log "github.com/sirupsen/logrus"
 	"github.com/toefel18/garsson-api/garsson/db"
+	"github.com/toefel18/garsson-api/garsson/log"
 )
 
 // Implementation inspired by https://medium.com/@matryer/how-i-write-go-http-services-after-seven-years-37c208122831

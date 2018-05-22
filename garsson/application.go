@@ -1,24 +1,27 @@
 package main
 
 import (
+    "encoding/hex"
+    "fmt"
     "os"
 
-    "github.com/sirupsen/logrus"
     "github.com/toefel18/garsson-api/garsson/api"
     "github.com/toefel18/garsson-api/garsson/db"
     "github.com/toefel18/garsson-api/garsson/db/migration"
-    "github.com/toefel18/garsson-api/garsson/logging"
+    "github.com/toefel18/garsson-api/garsson/log"
+    "golang.org/x/crypto/sha3"
 )
 
 //docker run --name garsson-api-postgres -p 5432:5432 -e POSTGRES_USER=garsson -e POSTGRES_PASSWORD=garsson -d postgres
 var ConnectionString = envOrDefault("CONNECTION_STRING", "postgres://garsson:garsson@localhost:5432/garsson?sslmode=disable")
 
 func main() {
-    logging.ConfigureDefault()
-    logrus.Info("Starting Garsson")
+    doHash()
+    log.ConfigureDefault()
+    log.Info("Starting Garsson")
     dao, err := db.NewDao(ConnectionString)
     if err != nil {
-        logrus.WithError(err).Error("Invalid connection string")
+        log.WithError(err).Error("Invalid connection string")
         return
     }
     dao.WaitTillAvailable()
@@ -33,3 +36,6 @@ func envOrDefault(key, defaultValue string) string {
     }
     return defaultValue
 }
+
+
+

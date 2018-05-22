@@ -18,8 +18,8 @@ import (
 	"time"
 
 	"github.com/gocraft/dbr"
+	"github.com/toefel18/garsson-api/garsson/log"
 
-	log "github.com/sirupsen/logrus"
 )
 
 // SchemaVersionDDL contains the DDL for the SchemaVersion table

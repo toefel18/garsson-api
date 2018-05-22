@@ -1,10 +1,11 @@
 package db
 
 import (
-	"github.com/gocraft/dbr"
 	"time"
-	log "github.com/sirupsen/logrus"
+
+	"github.com/gocraft/dbr"
 	_ "github.com/lib/pq"
+	"github.com/toefel18/garsson-api/garsson/log"
 )
 
 // Dao manages an underlying db connection
