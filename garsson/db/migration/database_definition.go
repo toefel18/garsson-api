@@ -12,7 +12,7 @@ const (
 							price REAL,
 							date_added VARCHAR(64))`
 
-    V2UsersTable = `CREATE TABLE user (
+    V2UsersTable = `CREATE TABLE user_account (
                     email VARCHAR(128) PRIMARY KEY,
                     password_hash VARCHAR(128),
                     roles VARCHAR(256),

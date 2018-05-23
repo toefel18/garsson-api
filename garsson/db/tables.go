@@ -1,4 +1,4 @@
 package db
 
-const UserEntityTable = "user"
+const UserEntityTable = "user_account"
 const ProductEntityTable = "product"

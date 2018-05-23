@@ -1,7 +1,7 @@
 package api
 
 type GenericResponse struct {
-    Code     int
-    Message string
-    Data     interface{} `json:",omitempty"`
+    Code    int         `json:"code"`
+    Message string      `json:"message"`
+    Data    interface{} `json:"data,omitempty"`
 }

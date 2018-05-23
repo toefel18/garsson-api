@@ -8,10 +8,10 @@ import (
 
 // User entry in the database
 type UserEntity struct {
-    Email        string
-    PasswordHash string
-    Roles        string
-    LastSignIn   string
+    Email        string `json:"email,omitempty"`
+    PasswordHash string `json:"passwordHash,omitempty"`
+    Roles        string `json:"roles"`
+    LastSignIn   string `json:"lastSignIn,omitempty"`
 }
 
 func (u UserEntity) GetRoles() []string {
@@ -28,5 +28,5 @@ func (u UserEntity) GetRoles() []string {
 //JwtClaims extends the standard set of claims with roles
 type JwtClaims struct {
     jwt.StandardClaims
-    Roles []string
+    Roles []string `json:"roles,omitempty"`
 }
