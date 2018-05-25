@@ -43,13 +43,17 @@ func (s *Server) login() echo.HandlerFunc {
             return c.JSON(http.StatusBadRequest, GenericResponse{Code: http.StatusBadRequest, Message: err.Error()})
         }
 
-        if jwt, user, err := auth.Authenticate(s.dao.NewSession(), loginRequest.Email, loginRequest.Password, []byte("dummy-for-now")); err == nil {
-            log.WithField("email", user.Email).WithField("roles", user.Roles).Info("user authenticated")
-            c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %v", jwt))
-            return c.JSON(http.StatusOK, GenericResponse{Code: http.StatusOK, Message: "login success", Data: user})
-        } else {
+        if jwt, user, err := auth.Authenticate(s.dao.NewSession(), loginRequest.Email, loginRequest.Password, s.jwtSigningSecret); err != nil {
             log.WithField("email", loginRequest.Email).WithError(err).Warn("failed to authenticate")
             return c.JSON(http.StatusUnauthorized, GenericResponse{Code: http.StatusUnauthorized, Message: err.Error()})
+        } else if authenticatedUser, validationErr := auth.ValidateJWT(jwt, s.jwtSigningSecret); validationErr != nil {
+            log.WithError(validationErr).WithField("email", user.Email).WithField("roles", user.Roles).Info("generated JWT but could not validate")
+            return c.JSON(http.StatusInternalServerError, GenericResponse{Code: http.StatusInternalServerError, Message: validationErr.Error()})
+        } else {
+            log.WithField("email", user.Email).WithField("roles", user.Roles).Info("user authenticated")
+            c.Set(AuthenticatedUserKey, authenticatedUser)
+            c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %v", jwt))
+            return c.JSON(http.StatusOK, GenericResponse{Code: http.StatusOK, Message: "login success", Data: user})
         }
     }
 }

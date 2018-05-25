@@ -1,21 +1,13 @@
 package api
 
-import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-)
-
 func (s *Server) configureRoutes() {
-	s.router.Use(middleware.Logger())
-	s.router.Use(middleware.Recover())
-	s.router.Use(middleware.Secure())
+    // unauthenticated route
+	s.router.POST("/v1/login", s.login())
 
-	echo.NotFoundHandler = s.notFound()
-	echo.MethodNotAllowedHandler = s.methodNotAllowed()
+	authenticated := s.router.Group("")
+	authenticated.Use(s.authenticate())
 
-	v1 := s.router.Group("/v1")
-
-	v1.POST("/login", s.login())
+	v1 := authenticated.Group("/v1")
 	v1.GET("/hello", s.handleHello())
-	v1.GET("/db", s.databaseVersion())
+	v1.GET("/db", s.databaseVersion(), s.requireRole("sjonnie"))
 }

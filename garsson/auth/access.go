@@ -16,3 +16,7 @@ func QueryUserEntity(session dbr.SessionRunner, email string) (user UserEntity, 
     return
 }
 
+func UpdateLastSignInToNow(session dbr.SessionRunner, email string) error {
+    // TODO implement: update LastSignIn to now!
+    return nil
+}

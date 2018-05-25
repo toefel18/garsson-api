@@ -4,11 +4,13 @@ import (
     "encoding/hex"
     "errors"
     "fmt"
+    "strings"
     "time"
 
     "github.com/dgrijalva/jwt-go"
     "github.com/gocraft/dbr"
     "github.com/satori/go.uuid"
+    "github.com/toefel18/garsson-api/garsson/log"
     "golang.org/x/crypto/sha3"
 )
 
@@ -32,11 +34,37 @@ func Authenticate(sess dbr.SessionRunner, email, password string, signingSecret 
         return "", UserEntity{}, ErrUserNotFound
     } else if hashPassword(password) != user.PasswordHash {
         return "", UserEntity{}, ErrInvalidPassword
-    } else if jwt, err := createToken(user, signingSecret); err != nil {
+    } else if jwtToken, err := createToken(user, signingSecret); err != nil {
         return "", UserEntity{}, fmt.Errorf(TokenGenerationErrorFmt, err.Error())
     } else {
+        UpdateLastSignInToNow(sess, user.Email)
         user.PasswordHash = "" // no need to expose!
-        return jwt, user, nil
+        return jwtToken, user, nil
+    }
+}
+
+// ValidateJWT parses the JWT and checks if the signature, returns a user object which includes the claims
+func ValidateJWT(rawJWT string, signingSecret []byte) (UserFromJwt, error) {
+    parsedJwt, err := jwt.ParseWithClaims(strings.TrimSpace(rawJWT), &JwtClaims{}, signatureAndAlgorithmVerifier(signingSecret))
+    if err != nil {
+        return UserFromJwt{}, err
+    }
+    if claims, ok := parsedJwt.Claims.(*JwtClaims); ok {
+        return UserFromJwt{Email: claims.Subject, Roles: claims.Roles, Claims: claims}, nil
+    } else {
+        return UserFromJwt{}, fmt.Errorf("jwt did not have expected claims")
+    }
+}
+
+func signatureAndAlgorithmVerifier(secret []byte) func(token *jwt.Token) (interface{}, error) {
+    return func(token *jwt.Token) (interface{}, error) {
+        // Don't forget to validate the alg is what you expect:
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            log.WithField("unexpectedSigningMethod", token.Header["alg"]).Warn("cannot validate JWT signature")
+            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+        }
+
+        return secret, nil
     }
 }
 
