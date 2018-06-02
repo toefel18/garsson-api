@@ -26,7 +26,14 @@ const (
 )
 
 func (s *Server) configureMiddleware() {
-    s.router.Use(s.loggingMiddleware())
+    s.router.Use(s.loggingMiddleware([]string{"/app"}))
+    s.router.Use(middleware.CORS())
+    //s.router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+    //    Skipper:      middleware.DefaultSkipper,
+    //    AllowOrigins: []string{"*"},
+    //    AllowHeaders: []string{"Authorization", "Content-Type", "Content-Length"},
+    //    AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+    //}))
     //s.router.Use(middleware.Logger())
     s.router.Use(middleware.Recover())
     s.router.Use(middleware.Secure())
@@ -35,7 +42,7 @@ func (s *Server) configureMiddleware() {
     echo.MethodNotAllowedHandler = s.methodNotAllowed()
 }
 
-func (s *Server) loggingMiddleware() echo.MiddlewareFunc {
+func (s *Server) loggingMiddleware(skipPrefixes []string) echo.MiddlewareFunc {
     return func(next echo.HandlerFunc) echo.HandlerFunc {
         return func(c echo.Context) (err error) {
             req := c.Request()
@@ -45,6 +52,13 @@ func (s *Server) loggingMiddleware() echo.MiddlewareFunc {
                 c.Error(err)
             }
             stop := time.Now()
+
+            for _, skipPrefix := range skipPrefixes {
+                if strings.HasPrefix(req.RequestURI, skipPrefix) {
+                    return
+                }
+            }
+
             username := "not_authenticated"
             if user, err := s.getCurrentUser(c); err == nil {
                 username = user.Email
