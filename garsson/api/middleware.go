@@ -26,15 +26,11 @@ const (
 )
 
 func (s *Server) configureMiddleware() {
+    corsCfg := middleware.DefaultCORSConfig
+    corsCfg.ExposeHeaders = append(corsCfg.ExposeHeaders, "Authorization")
+
     s.router.Use(s.loggingMiddleware([]string{"/app"}))
-    s.router.Use(middleware.CORS())
-    //s.router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-    //    Skipper:      middleware.DefaultSkipper,
-    //    AllowOrigins: []string{"*"},
-    //    AllowHeaders: []string{"Authorization", "Content-Type", "Content-Length"},
-    //    AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
-    //}))
-    //s.router.Use(middleware.Logger())
+    s.router.Use(middleware.CORSWithConfig(corsCfg))
     s.router.Use(middleware.Recover())
     s.router.Use(middleware.Secure())
 
