@@ -10,7 +10,7 @@ import (
 func QueryUserEntity(session dbr.SessionRunner, email string) (user UserEntity, err error) {
     err = session.
         Select("*").
-        From(db.UserEntityTable).
+        From(db.UserAccountTable).
         Where("email = ?", email).
         LoadOne(&user)
     return

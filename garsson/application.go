@@ -21,7 +21,9 @@ func main() {
         return
     }
     dao.WaitTillAvailable()
-    migration.MigrateDatabase(dao.NewSession())
+    if err := migration.MigrateDatabase(dao.NewSession()); err != nil {
+        log.WithError(err).Fatal("database migration failed")
+    }
     apiServer := api.NewServer(dao)
     apiServer.Start()
 }

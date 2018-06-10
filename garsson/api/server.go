@@ -45,3 +45,4 @@ func (s *Server) getCurrentUser(c echo.Context) (auth.UserFromJwt, error) {
     }
     return auth.UserFromJwt{}, ErrNotAuthenticated
 }
+

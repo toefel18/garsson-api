@@ -2,11 +2,14 @@ package api
 
 import (
     "fmt"
+    "strconv"
 
+    "github.com/gocraft/dbr"
     "github.com/labstack/echo"
     "github.com/toefel18/garsson-api/garsson/auth"
     "github.com/toefel18/garsson-api/garsson/db/migration"
     "github.com/toefel18/garsson-api/garsson/log"
+    "github.com/toefel18/garsson-api/garsson/order"
 
     "net/http"
 )
@@ -64,6 +67,36 @@ func (s *Server) databaseVersion() echo.HandlerFunc {
             return c.JSON(http.StatusInternalServerError, GenericResponse{Code: http.StatusInternalServerError, Message: err.Error()})
         } else {
             return c.JSON(http.StatusOK, versions)
+        }
+    }
+}
+
+func (s *Server) handleProducts() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        if products, err := order.QueryProducts(s.dao.NewSession()); err != nil {
+            return c.JSON(http.StatusInternalServerError, GenericResponse{Code: http.StatusInternalServerError, Message: err.Error()})
+        } else {
+            return c.JSON(http.StatusOK, products)
+        }
+    }
+}
+
+func (s *Server) handleOrders() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        return c.JSON(http.StatusNotImplemented, GenericResponse{Code: 501, Message: "not impl"})
+    }
+}
+
+func (s *Server) handleOrder() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        if orderId, err := strconv.ParseInt(c.Param("orderId"), 10, 64); err != nil {
+            return c.JSON(http.StatusBadRequest, GenericResponse{Code: http.StatusBadRequest, Message: "order id must be number"})
+        } else if order, err := order.FindOrderByID(s.dao.NewSession(), orderId); err == dbr.ErrNotFound {
+            return c.JSON(http.StatusNotFound, GenericResponse{Code: http.StatusNotFound, Message: "not found"})
+        } else if err != nil {
+            return c.JSON(http.StatusInternalServerError, GenericResponse{Code: http.StatusInternalServerError, Message: err.Error()})
+        } else {
+            return c.JSON(http.StatusOK, order)
         }
     }
 }
