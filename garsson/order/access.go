@@ -37,3 +37,11 @@ func queryOrderLinesByOrderID(sess dbr.SessionRunner, orderId int64) ([]*custome
         return orderLines, nil
     }
 }
+
+func queryOrdersWithStatus(sess dbr.SessionRunner, status []string) ([]*customerOrderEntity, error) {
+    var order = []*customerOrderEntity{}
+    var err error
+    _, err = sess.Select("*").From(db.CustomerOrderTable).Where("status IN ?", status).Load(&order)
+    return order, err
+
+}

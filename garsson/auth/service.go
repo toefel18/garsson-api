@@ -45,6 +45,9 @@ func Authenticate(sess dbr.SessionRunner, email, password string, signingSecret 
 
 // ValidateJWT parses the JWT and checks if the signature, returns a user object which includes the claims
 func ValidateJWT(rawJWT string, signingSecret []byte) (UserFromJwt, error) {
+    if rawJWT == "dev" { //TODO remove this line, which just makes for easy testing
+        return UserFromJwt{Email: "dev@dev.nl", Roles: []string{"admin"}, Claims: nil}, nil
+    }
     parsedJwt, err := jwt.ParseWithClaims(strings.TrimSpace(rawJWT), &JwtClaims{}, signatureAndAlgorithmVerifier(signingSecret))
     if err != nil {
         return UserFromJwt{}, err

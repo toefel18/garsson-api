@@ -83,7 +83,15 @@ func (s *Server) handleProducts() echo.HandlerFunc {
 
 func (s *Server) handleOrders() echo.HandlerFunc {
     return func(c echo.Context) error {
-        return c.JSON(http.StatusNotImplemented, GenericResponse{Code: 501, Message: "not impl"})
+        status := c.QueryParams()["status"]
+
+        if len(status) == 0 {
+            return c.JSON(http.StatusOK, []string{})
+        } else if orders, err := order.FindOrdersWithStatus(s.dao.NewSession(), status); err != nil {
+            return c.JSON(http.StatusInternalServerError, GenericResponse{Code: http.StatusInternalServerError, Message: err.Error()})
+        } else {
+            return c.JSON(http.StatusOK, orders)
+        }
     }
 }
 
@@ -99,4 +107,12 @@ func (s *Server) handleOrder() echo.HandlerFunc {
             return c.JSON(http.StatusOK, order)
         }
     }
+}
+
+func queryParamList(c echo.Context, key string, defaultValue []string) []string {
+    values := c.QueryParams()[key]
+    if len(values) == 0 {
+        return defaultValue
+    }
+    return values
 }

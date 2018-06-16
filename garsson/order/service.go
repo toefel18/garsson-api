@@ -14,6 +14,26 @@ func FindOrderByID(sess dbr.SessionRunner, id int64) (*CustomerOrder, error) {
     }
 }
 
+func FindOrdersWithStatus(sess dbr.SessionRunner, status []string) ([]*CustomerOrder, error) {
+    orders, err := queryOrdersWithStatus(sess, status)
+    if err != nil {
+        return nil, err
+    }
+
+    customerOrders := make([]*CustomerOrder, 0)
+    for _, v := range orders {
+        if orderLines, err := queryOrderLinesByOrderID(sess, v.ID); err != nil {
+            return nil, err
+        } else if customerOrder, err := mapOrderToPublicAPI(v, orderLines); err != nil{
+            return nil, err
+        } else {
+            customerOrders = append(customerOrders, customerOrder)
+        }
+    }
+    return customerOrders, nil
+}
+
+
 func mapOrderToPublicAPI(order *customerOrderEntity, lines []*customerOrderLineEntity) (*CustomerOrder, error) {
     publicOrder := CustomerOrder{
         ID:                order.ID,
