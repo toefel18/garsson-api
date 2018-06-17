@@ -3,13 +3,16 @@ package api
 import (
     "fmt"
     "strconv"
+    "time"
 
     "github.com/gocraft/dbr"
     "github.com/labstack/echo"
+    "github.com/labstack/gommon/random"
     "github.com/toefel18/garsson-api/garsson/auth"
     "github.com/toefel18/garsson-api/garsson/db/migration"
     "github.com/toefel18/garsson-api/garsson/log"
     "github.com/toefel18/garsson-api/garsson/order"
+    "golang.org/x/net/websocket"
 
     "net/http"
 )
@@ -29,6 +32,23 @@ func (s *Server) methodNotAllowed() echo.HandlerFunc {
 func (s *Server) handleHello() echo.HandlerFunc {
     return func(c echo.Context) error {
         return c.JSON(http.StatusOK, "World")
+    }
+}
+
+func (s *Server) handleWebSocketOrderEventStream() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        websocket.Handler(func (ws *websocket.Conn){
+            defer ws.Close()
+            for {
+                err := websocket.Message.Send(ws, "Hello World " + random.String(5))
+                if err != nil {
+                    log.WithError(err).Error("Websocket comm error")
+                }
+
+                time.Sleep(10 * time.Second)
+            }
+        }).ServeHTTP(c.Response(), c.Request())
+        return nil
     }
 }
 

@@ -12,4 +12,5 @@ func (s *Server) configureRoutes() {
 	v1.GET("/products", s.handleProducts())
 	v1.GET("/orders", s.handleOrders())
 	v1.GET("/orders/:orderId", s.handleOrder())
+	s.router.GET("/api/v1/orders/ws-eventstream", s.handleWebSocketOrderEventStream())
 }
